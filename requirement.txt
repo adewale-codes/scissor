@@ -34,3 +34,5 @@ ujson==5.9.0
 uvicorn==0.27.1
 watchfiles==0.21.0
 websockets==12.0
+alembic
+psycopg2

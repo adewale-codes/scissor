@@ -25,6 +25,7 @@ def upgrade() -> None:
         sa.Column('short_url', sa.String, index=True, unique=True),
         sa.Column('custom_alias', sa.String, index=True, nullable=True),
         sa.Column('click_count', sa.Integer, default=0),
+        sa.PrimaryKeyConstraint('id')
     )
 
 
