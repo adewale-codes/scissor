@@ -1,11 +1,30 @@
 from sqlalchemy.orm import Session
+from app.utils.qr_code_generator import save_qr_code
 from app.models.url import URL
+from app.models.user import User
+import shortuuid
+from fastapi import HTTPException
 
 def create_url(db: Session, original_url: str, custom_alias: str = None):
-    url_db = URL(original_url=original_url, custom_alias=custom_alias)
+    short_url = shortuuid.uuid()[:8]
+
+    if custom_alias:
+        existing_url = db.query(URL).filter(URL.custom_alias == custom_alias).first()
+        if existing_url:
+            raise HTTPException(status_code=400, detail="Custom alias already exists")
+
+    url_db = URL(original_url=original_url, short_url=short_url, custom_alias=custom_alias)
+    
     db.add(url_db)
     db.commit()
     db.refresh(url_db)
+
+    qr_code_path = save_qr_code(short_url)
+
+    url_db.qr_code_path = qr_code_path
+
+    db.commit()
+
     return url_db
 
 def get_url_by_short_url(db: Session, short_url: str):
@@ -22,4 +41,8 @@ def get_url_analytics(db: Session, short_url: str):
     return None
 
 def get_link_history(db: Session, user_id: int):
-    return db.query(URL).filter(URL.user_id == user_id).all()
+    return (
+        db.query(URL)
+        .filter(URL.user_id == user_id)
+        .all()
+    )

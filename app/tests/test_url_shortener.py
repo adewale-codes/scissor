@@ -1,11 +1,15 @@
 from fastapi.testclient import TestClient
 from main import app
+from app.db.database import get_db
 from app.db import database
+from sqlalchemy.orm import Session
+from fastapi import Depends
+
 
 client = TestClient(app)
 
-def test_create_url():
-    response = client.post("/create_url/", json={"original_url": "https://www.example.com"})
+def test_create_url(db: Session = Depends(get_db)):
+    response = client.post("/create_url/", json={"original_url": "https://www.example.com"}, dependencies=[Depends(get_db)])
     assert response.status_code == 200
     data = response.json()
     assert "original_url" in data
