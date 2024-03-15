@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Depends, HTTPException
 from app.routes import url_shortener, user
-from app.db.database import SessionLocal
+from app.db.database import SessionLocal, engine, Base
 from app.db.database import get_db
 from sqlalchemy.orm import Session
 from fastapi.middleware.cors import CORSMiddleware
@@ -9,6 +9,9 @@ from cachetools import TTLCache
 cache = TTLCache(maxsize=100, ttl=300)
 
 app = FastAPI(debug=True)
+
+def init_db():
+    Base.metadata.create_all(bind=engine)
 
 origins = [
     "http://localhost",
@@ -26,6 +29,8 @@ app.add_middleware(
 
 app.include_router(url_shortener.router, prefix="")
 app.include_router(user.router, prefix="/user")
+
+init_db()
 
 @app.get("/")
 def root(db: Session = Depends(get_db)):
