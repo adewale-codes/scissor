@@ -1,6 +1,6 @@
 from typing import Optional
 from fastapi import Depends, HTTPException, status
-import jwt as pyjwt
+import jose as jwt
 from datetime import datetime, timedelta
 from app.utils.security import pwd_context
 
@@ -13,7 +13,7 @@ def create_jwt_token(data: dict):
     expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     to_encode.update({"exp": expire})
     
-    return pyjwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
 def decode_jwt_token(token: str = Depends(), credentials_exception=HTTPException(
     status_code=status.HTTP_401_UNAUTHORIZED,
@@ -21,11 +21,11 @@ def decode_jwt_token(token: str = Depends(), credentials_exception=HTTPException
     headers={"WWW-Authenticate": "Bearer"},
 )):
     try:
-        decoded_token = pyjwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        decoded_token = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         return decoded_token
-    except pyjwt.ExpiredSignatureError:
+    except jwt.ExpiredSignatureError:
         raise credentials_exception
-    except pyjwt.InvalidTokenError:
+    except jwt.InvalidTokenError:
         raise credentials_exception
 
 def get_current_user(token: dict = Depends(decode_jwt_token)) -> Optional[dict]:
