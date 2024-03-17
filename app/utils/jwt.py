@@ -1,6 +1,6 @@
 from typing import Optional
 from fastapi import Depends, HTTPException, status
-import jose as jwt
+from jose import jwt
 from datetime import datetime, timedelta
 from app.utils.security import pwd_context
 
