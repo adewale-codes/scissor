@@ -17,6 +17,7 @@ origins = [
     "http://localhost",
     "http://localhost:3000",
     "http://localhost:3001",
+    "https://ade-scissors.netlify.app",
 ]
 
 app.add_middleware(
